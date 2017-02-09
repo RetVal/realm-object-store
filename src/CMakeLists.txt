@@ -6,6 +6,8 @@ set(SOURCES
     object.cpp
     object_schema.cpp
     object_store.cpp
+    primitive_list.cpp
+    primitive_results.cpp
     results.cpp
     schema.cpp
     shared_realm.cpp
@@ -15,6 +17,7 @@ set(SOURCES
     impl/collection_notifier.cpp
     impl/list_notifier.cpp
     impl/object_notifier.cpp
+    impl/primitive_list_notifier.cpp
     impl/realm_coordinator.cpp
     impl/results_base.cpp
     impl/results_notifier.cpp
@@ -35,6 +38,8 @@ set(HEADERS
     object_accessor.hpp
     object_schema.hpp
     object_store.hpp
+    primitive_list.hpp
+    primitive_results.hpp
     property.hpp
     results.hpp
     schema.hpp
@@ -51,6 +56,7 @@ set(HEADERS
     impl/external_commit_helper.hpp
     impl/list_notifier.hpp
     impl/object_notifier.hpp
+    impl/primitive_list_notifier.hpp
     impl/realm_coordinator.hpp
     impl/results_base.hpp
     impl/results_notifier.hpp
@@ -71,6 +77,7 @@ set(HEADERS
     util/compiler.hpp
     util/event_loop_signal.hpp
     util/format.hpp
+    util/tagged_bool.hpp
     util/time.hpp
     util/uuid.hpp)
 

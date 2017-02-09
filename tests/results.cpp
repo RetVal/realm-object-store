@@ -28,6 +28,7 @@
 #include "object_schema.hpp"
 #include "property.hpp"
 #include "results.hpp"
+#include "primitive_results.hpp"
 #include "schema.hpp"
 
 #include <realm/group_shared.hpp>
@@ -43,6 +44,7 @@
 using namespace realm;
 
 TEST_CASE("notifications: async delivery") {
+    PrimitiveResults<int64_t> asdf;
     _impl::RealmCoordinator::assert_no_open_realms();
 
     InMemoryTestFile config;
@@ -1771,7 +1773,7 @@ TEST_CASE("results: snapshots") {
     config.schema = Schema{
         {"object", {
             {"value", PropertyType::Int},
-            {"array", PropertyType::Array, "linked to object"}
+            {"array", PropertyType::Array|PropertyType::Object, "linked to object"}
         }},
         {"linked to object", {
             {"value", PropertyType::Int}
@@ -2303,7 +2305,7 @@ TEST_CASE("aggregate") {
             {"date", PropertyType::Date, "", "", false, false, true},
         }},
         {"linking_object", {
-            {"link", PropertyType::Array, "object", "", false, false, false}
+            {"link", PropertyType::Array|PropertyType::Object, "object", "", false, false, false}
         }},
     });
 
