@@ -22,7 +22,6 @@
 #include "impl/results_base.hpp"
 
 namespace realm {
-template<typename T>
 class PrimitiveResults : public _impl::ResultsBase {
 public:
     enum class Sort {
@@ -51,18 +50,18 @@ public:
 
     // Get the currently applied distinct condition for this PrimitiveResults
     bool is_distinct() const noexcept;
-    
+
     // Get the row accessor for the given index
     // Throws OutOfBoundsIndexException if index >= size()
-    T get(size_t index);
+    template<typename T> T get(size_t index);
 
     // Get a row accessor for the first/last row, or none if the results are empty
     // More efficient than calling size()+get()
-    util::Optional<T> first();
-    util::Optional<T> last();
+    template<typename T> util::Optional<T> first();
+    template<typename T> util::Optional<T> last();
 
     // Get the first index of the given value in this results, or not_found
-    size_t index_of(T value);
+    template<typename T> size_t index_of(T value);
 
     // Create a new PrimitiveResults by further filtering or sorting this PrimitiveResults
     PrimitiveResults filter(Query&& q) const;
@@ -70,7 +69,7 @@ public:
 
     // Create a new PrimitiveResults by removing duplicates
     PrimitiveResults distinct();
-    
+
     // Return a snapshot of this PrimitiveResults that never updates to reflect
     // changes in the underlying data
     PrimitiveResults snapshot() const&;
@@ -81,19 +80,25 @@ public:
     // sum() returns 0, except for when it returns none
     // Throws UnsupportedColumnTypeException for sum/average on timestamp or non-numeric column
     // Throws OutOfBoundsIndexException for an out-of-bounds column
-    util::Optional<T> max();
-    util::Optional<T> min();
-    util::Optional<double> average();
-    util::Optional<T> sum();
+    template<typename T> util::Optional<T> max();
+    template<typename T> util::Optional<T> min();
+    template<typename T> util::Optional<double> average();
+    template<typename T> util::Optional<T> sum();
+
+    template<typename Context> auto get(Context&, size_t index);
+    template<typename Context> auto first(Context&);
+    template<typename Context> auto last(Context&);
+
+    template<typename Context, typename T>
+    size_t index_of(Context&, T value);
+
+    template<typename Context> auto max(Context&);
+    template<typename Context> auto min(Context&);
+    template<typename Context> auto average(Context&);
+    template<typename Context> auto sum(Context&);
 
 private:
     Sort m_sort = Sort::None;
-
-    template<typename Int, typename Float, typename Double, typename Timestamp>
-    util::Optional<Mixed> aggregate(size_t column,
-                                    const char* name,
-                                    Int agg_int, Float agg_float,
-                                    Double agg_double, Timestamp agg_timestamp);
 };
 }
 

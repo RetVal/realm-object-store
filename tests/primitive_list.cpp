@@ -64,7 +64,7 @@ TEST_CASE("primitive list") {
         }}
     });
 
-    PrimitiveList<int64_t> list;
+    PrimitiveList list;
 
     SECTION("size()") {
         CHECK(list.size() == 0);

@@ -31,45 +31,35 @@
 
 using namespace realm;
 
-template<typename T>
-PrimitiveResults<T>::PrimitiveResults() = default;
-template<typename T>
-PrimitiveResults<T>::~PrimitiveResults() = default;
+PrimitiveResults::PrimitiveResults() = default;
+PrimitiveResults::~PrimitiveResults() = default;
 
-template<typename T>
-PrimitiveResults<T>::PrimitiveResults(std::shared_ptr<Realm> r, Query q, Sort s, bool d)
+PrimitiveResults::PrimitiveResults(std::shared_ptr<Realm> r, Query q, Sort s, bool d)
 : _impl::ResultsBase(std::move(r), std::move(q))
 , m_sort(s)
 {
 }
 
-template<typename T>
-PrimitiveResults<T>::PrimitiveResults(std::shared_ptr<Realm> r, Table& table)
+PrimitiveResults::PrimitiveResults(std::shared_ptr<Realm> r, Table& table)
 : _impl::ResultsBase(std::move(r), table)
 {
 }
 
-template<typename T>
-PrimitiveResults<T>::PrimitiveResults(std::shared_ptr<Realm> r, TableView tv, Sort s, bool d)
+PrimitiveResults::PrimitiveResults(std::shared_ptr<Realm> r, TableView tv, Sort s, bool d)
 : _impl::ResultsBase(std::move(r), std::move(tv))
 , m_sort(s)
 {
 }
 
-template<typename T>
-bool PrimitiveResults<T>::is_distinct() const noexcept
+bool PrimitiveResults::is_distinct() const noexcept
 {
     return (bool)ResultsBase::get_distinct();
 }
 
-template<typename T>
-PrimitiveResults<T>::PrimitiveResults(const PrimitiveResults&) = default;
-template<typename T>
-PrimitiveResults<T>& PrimitiveResults<T>::operator=(const PrimitiveResults&) = default;
-template<typename T>
-PrimitiveResults<T>::PrimitiveResults(PrimitiveResults&& other) = default;
-template<typename T>
-PrimitiveResults<T>& PrimitiveResults<T>::operator=(PrimitiveResults&& other) = default;
+PrimitiveResults::PrimitiveResults(const PrimitiveResults&) = default;
+PrimitiveResults& PrimitiveResults::operator=(const PrimitiveResults&) = default;
+PrimitiveResults::PrimitiveResults(PrimitiveResults&& other) = default;
+PrimitiveResults& PrimitiveResults::operator=(PrimitiveResults&& other) = default;
 
 template<typename T>
 constexpr auto is_dereferencable(int) -> decltype(*T(), bool()) { return true; }
@@ -96,7 +86,7 @@ T get(Table& table, size_t row)
 }
 
 template<typename T>
-T PrimitiveResults<T>::get(size_t row_ndx)
+T PrimitiveResults::get(size_t row_ndx)
 {
     validate_read();
     switch (get_mode()) {
@@ -120,7 +110,7 @@ T PrimitiveResults<T>::get(size_t row_ndx)
 }
 
 template<typename T>
-util::Optional<T> PrimitiveResults<T>::first()
+util::Optional<T> PrimitiveResults::first()
 {
     validate_read();
     switch (get_mode()) {
@@ -141,7 +131,7 @@ util::Optional<T> PrimitiveResults<T>::first()
 }
 
 template<typename T>
-util::Optional<T> PrimitiveResults<T>::last()
+util::Optional<T> PrimitiveResults::last()
 {
     validate_read();
     switch (get_mode()) {
@@ -203,7 +193,7 @@ REALM_FIND_FIRST(StringData, string)
 REALM_FIND_FIRST(BinaryData, binary)
 
 template<typename T>
-size_t PrimitiveResults<T>::index_of(T value)
+size_t PrimitiveResults::index_of(T value)
 {
     validate_read();
     switch (get_mode()) {
@@ -289,7 +279,7 @@ REALM_AVERAGE_FUNCTION(TableView, double, double)
 
 
 template<typename T>
-util::Optional<T> PrimitiveResults<T>::max()
+util::Optional<T> PrimitiveResults::max()
 {
     switch (get_mode()) {
         default: REALM_COMPILER_HINT_UNREACHABLE();
@@ -305,7 +295,7 @@ util::Optional<T> PrimitiveResults<T>::max()
 }
 
 template<typename T>
-util::Optional<T> PrimitiveResults<T>::min()
+util::Optional<T> PrimitiveResults::min()
 {
     switch (get_mode()) {
         default: REALM_COMPILER_HINT_UNREACHABLE();
@@ -321,7 +311,7 @@ util::Optional<T> PrimitiveResults<T>::min()
 }
 
 template<typename T>
-util::Optional<T> PrimitiveResults<T>::sum()
+util::Optional<T> PrimitiveResults::sum()
 {
     switch (get_mode()) {
         default: REALM_COMPILER_HINT_UNREACHABLE();
@@ -337,7 +327,7 @@ util::Optional<T> PrimitiveResults<T>::sum()
 }
 
 template<typename T>
-util::Optional<double> PrimitiveResults<T>::average()
+util::Optional<double> PrimitiveResults::average()
 {
     switch (get_mode()) {
         default: REALM_COMPILER_HINT_UNREACHABLE();
@@ -352,40 +342,60 @@ util::Optional<double> PrimitiveResults<T>::average()
     }
 }
 
-template<typename T>
-PrimitiveResults<T> PrimitiveResults<T>::sort(Sort sort) const
+PrimitiveResults PrimitiveResults::sort(Sort sort) const
 {
     return PrimitiveResults(get_realm(), get_query(), sort, is_distinct());
 }
 
-template<typename T>
-PrimitiveResults<T> PrimitiveResults<T>::filter(Query&& q) const
+PrimitiveResults PrimitiveResults::filter(Query&& q) const
 {
     return PrimitiveResults(get_realm(), get_query().and_query(std::move(q)), get_sort(), is_distinct());
 }
 
-template<typename T>
-PrimitiveResults<T> PrimitiveResults<T>::distinct()
+PrimitiveResults PrimitiveResults::distinct()
 {
     auto tv = get_tableview();
     tv.distinct(0);
     return PrimitiveResults(get_realm(), std::move(tv), get_sort(), true);
 }
 
-template<typename T>
-PrimitiveResults<T> PrimitiveResults<T>::snapshot() const &
+PrimitiveResults PrimitiveResults::snapshot() const &
 {
     validate_read();
     return PrimitiveResults(*this).snapshot();
 }
 
-template<typename T>
-PrimitiveResults<T> PrimitiveResults<T>::snapshot() &&
+PrimitiveResults PrimitiveResults::snapshot() &&
 {
     snapshot();
     return std::move(*this);
 }
 
+namespace realm {
+#define REALM_PRIMITIVE_RESULTS_TYPE(T) \
+    template T PrimitiveResults::get<T>(size_t); \
+    template size_t PrimitiveResults::index_of<T>(T); \
+    template util::Optional<T> PrimitiveResults::max<T>(); \
+    template util::Optional<T> PrimitiveResults::min<T>(); \
+    template util::Optional<double> PrimitiveResults::average<T>(); \
+    template util::Optional<T> PrimitiveResults::sum<T>();
+
+REALM_PRIMITIVE_RESULTS_TYPE(bool)
+REALM_PRIMITIVE_RESULTS_TYPE(int64_t)
+REALM_PRIMITIVE_RESULTS_TYPE(float)
+REALM_PRIMITIVE_RESULTS_TYPE(double)
+REALM_PRIMITIVE_RESULTS_TYPE(StringData)
+REALM_PRIMITIVE_RESULTS_TYPE(BinaryData)
+REALM_PRIMITIVE_RESULTS_TYPE(Timestamp)
+REALM_PRIMITIVE_RESULTS_TYPE(util::Optional<bool>)
+REALM_PRIMITIVE_RESULTS_TYPE(util::Optional<int64_t>)
+REALM_PRIMITIVE_RESULTS_TYPE(util::Optional<float>)
+REALM_PRIMITIVE_RESULTS_TYPE(util::Optional<double>)
+
+#undef REALM_PRIMITIVE_RESULTS_TYPE
+}
+
+#if 0
 namespace realm {
     template class PrimitiveResults<bool>;
     template class PrimitiveResults<int64_t>;
@@ -399,3 +409,4 @@ namespace realm {
     template class PrimitiveResults<util::Optional<float>>;
     template class PrimitiveResults<util::Optional<double>>;
 }
+#endif

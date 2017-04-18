@@ -32,43 +32,33 @@
 using namespace realm;
 using namespace realm::_impl;
 
-template<typename T>
-PrimitiveList<T>::PrimitiveList() noexcept = default;
-template<typename T>
-PrimitiveList<T>::~PrimitiveList() = default;
+PrimitiveList::PrimitiveList() noexcept = default;
+PrimitiveList::~PrimitiveList() = default;
 
-template<typename T>
-PrimitiveList<T>::PrimitiveList(const PrimitiveList&) = default;
-template<typename T>
-PrimitiveList<T>& PrimitiveList<T>::operator=(const PrimitiveList&) = default;
-template<typename T>
-PrimitiveList<T>::PrimitiveList(PrimitiveList&&) = default;
-template<typename T>
-PrimitiveList<T>& PrimitiveList<T>::operator=(PrimitiveList&&) = default;
+PrimitiveList::PrimitiveList(const PrimitiveList&) = default;
+PrimitiveList& PrimitiveList::operator=(const PrimitiveList&) = default;
+PrimitiveList::PrimitiveList(PrimitiveList&&) = default;
+PrimitiveList& PrimitiveList::operator=(PrimitiveList&&) = default;
 
-template<typename T>
-PrimitiveList<T>::PrimitiveList(std::shared_ptr<Realm> r, TableRef t) noexcept
+PrimitiveList::PrimitiveList(std::shared_ptr<Realm> r, TableRef t) noexcept
 : m_realm(std::move(r))
 , m_table(std::move(t))
 {
 }
 
-template<typename T>
-Query PrimitiveList<T>::get_query() const
+Query PrimitiveList::get_query() const
 {
     verify_attached();
     return m_table->where();
 }
 
-template<typename T>
-size_t PrimitiveList<T>::get_origin_row_index() const
+size_t PrimitiveList::get_origin_row_index() const
 {
     verify_attached();
     return m_table->get_parent_row_index();
 }
 
-template<typename T>
-void PrimitiveList<T>::verify_valid_row(size_t row_ndx, bool insertion) const
+void PrimitiveList::verify_valid_row(size_t row_ndx, bool insertion) const
 {
     size_t size = m_table->size();
     if (row_ndx > size || (!insertion && row_ndx == size)) {
@@ -76,23 +66,20 @@ void PrimitiveList<T>::verify_valid_row(size_t row_ndx, bool insertion) const
     }
 }
 
-template<typename T>
-bool PrimitiveList<T>::is_valid() const
+bool PrimitiveList::is_valid() const
 {
     m_realm->verify_thread();
     return m_table && m_table->is_attached();
 }
 
-template<typename T>
-void PrimitiveList<T>::verify_attached() const
+void PrimitiveList::verify_attached() const
 {
     if (!is_valid()) {
         throw List::InvalidatedException();
     }
 }
 
-template<typename T>
-void PrimitiveList<T>::verify_in_transaction() const
+void PrimitiveList::verify_in_transaction() const
 {
     verify_attached();
     if (!m_realm->is_in_transaction()) {
@@ -100,8 +87,7 @@ void PrimitiveList<T>::verify_in_transaction() const
     }
 }
 
-template<typename T>
-size_t PrimitiveList<T>::size() const
+size_t PrimitiveList::size() const
 {
     verify_attached();
     return m_table->size();
@@ -132,7 +118,7 @@ T get(Table& table, size_t row)
 }
 
 template<typename T>
-T PrimitiveList<T>::get(size_t row_ndx) const
+T PrimitiveList::get(size_t row_ndx) const
 {
     verify_attached();
     verify_valid_row(row_ndx);
@@ -140,7 +126,7 @@ T PrimitiveList<T>::get(size_t row_ndx) const
 }
 
 template<typename T>
-T PrimitiveList<T>::get_unchecked(size_t row_ndx) const noexcept
+T PrimitiveList::get_unchecked(size_t row_ndx) const noexcept
 {
     return ::get<T>(*m_table, row_ndx);
 }
@@ -151,21 +137,21 @@ template<typename T>
 bool is_null(util::Optional<T> value) { return !value; }
 
 template<typename T>
-size_t PrimitiveList<T>::find(T value) const
+size_t PrimitiveList::find(T value) const
 {
     verify_attached();
     return is_null(value) ? m_table->find_first_null(0) : m_table->find_first(0, unbox(value));
 }
 
 template<typename T>
-void PrimitiveList<T>::add(T value)
+void PrimitiveList::add(T value)
 {
     verify_in_transaction();
     m_table->set(0, m_table->add_empty_row(), value);
 }
 
 template<typename T>
-void PrimitiveList<T>::insert(size_t row_ndx, T value)
+void PrimitiveList::insert(size_t row_ndx, T value)
 {
     verify_in_transaction();
     verify_valid_row(row_ndx, true);
@@ -173,8 +159,7 @@ void PrimitiveList<T>::insert(size_t row_ndx, T value)
     m_table->set(0, row_ndx, value);
 }
 
-template<typename T>
-void PrimitiveList<T>::move(size_t source_ndx, size_t dest_ndx)
+void PrimitiveList::move(size_t source_ndx, size_t dest_ndx)
 {
     verify_in_transaction();
     verify_valid_row(source_ndx);
@@ -182,16 +167,14 @@ void PrimitiveList<T>::move(size_t source_ndx, size_t dest_ndx)
 //    m_table->move(source_ndx, dest_ndx);
 }
 
-template<typename T>
-void PrimitiveList<T>::remove(size_t row_ndx)
+void PrimitiveList::remove(size_t row_ndx)
 {
     verify_in_transaction();
     verify_valid_row(row_ndx);
     m_table->remove(row_ndx);
 }
 
-template<typename T>
-void PrimitiveList<T>::remove_all()
+void PrimitiveList::remove_all()
 {
     verify_in_transaction();
     m_table->clear();
@@ -213,15 +196,14 @@ void set(Table& table, size_t row, util::Optional<T> value)
 }
 
 template<typename T>
-void PrimitiveList<T>::set(size_t row_ndx, T value)
+void PrimitiveList::set(size_t row_ndx, T value)
 {
     verify_in_transaction();
     verify_valid_row(row_ndx);
     ::set(*m_table, row_ndx, value);
 }
 
-template<typename T>
-void PrimitiveList<T>::swap(size_t ndx1, size_t ndx2)
+void PrimitiveList::swap(size_t ndx1, size_t ndx2)
 {
     verify_in_transaction();
     verify_valid_row(ndx1);
@@ -229,69 +211,65 @@ void PrimitiveList<T>::swap(size_t ndx1, size_t ndx2)
     m_table->swap_rows(ndx1, ndx2);
 }
 
-template<typename T>
-PrimitiveResults<T> PrimitiveList<T>::sort(bool ascending)
+PrimitiveResults PrimitiveList::sort(bool ascending)
 {
     verify_attached();
-    return PrimitiveResults<T>(m_realm, get_query(),
-                               ascending ? PrimitiveResults<T>::Sort::Ascending : PrimitiveResults<T>::Sort::Descending);
+    return PrimitiveResults(m_realm, get_query(),
+                            ascending ? PrimitiveResults::Sort::Ascending
+                                      : PrimitiveResults::Sort::Descending);
 }
 
-template<typename T>
-PrimitiveResults<T> PrimitiveList<T>::filter(Query q)
+PrimitiveResults PrimitiveList::filter(Query q)
 {
     verify_attached();
-    return PrimitiveResults<T>(m_realm, get_query().and_query(std::move(q)));
+    return PrimitiveResults(m_realm, get_query().and_query(std::move(q)));
 }
 
-template<typename T>
-PrimitiveResults<T> PrimitiveList<T>::snapshot() const
+PrimitiveResults PrimitiveList::snapshot() const
 {
     verify_attached();
-    return PrimitiveResults<T>(m_realm, *m_table).snapshot();
+    return PrimitiveResults(m_realm, *m_table).snapshot();
 }
 
 template<typename T>
-util::Optional<T> PrimitiveList<T>::max()
+util::Optional<T> PrimitiveList::max()
 {
-    return PrimitiveResults<T>(m_realm, *m_table).max();
+    return PrimitiveResults(m_realm, *m_table).max<T>();
 }
 
 template<typename T>
-util::Optional<T> PrimitiveList<T>::min()
+util::Optional<T> PrimitiveList::min()
 {
-    return PrimitiveResults<T>(m_realm, *m_table).min();
+    return PrimitiveResults(m_realm, *m_table).min<T>();
 }
 
 template<typename T>
-util::Optional<T> PrimitiveList<T>::sum()
+util::Optional<T> PrimitiveList::sum()
 {
-    return PrimitiveResults<T>(m_realm, *m_table).sum();
+    return PrimitiveResults(m_realm, *m_table).sum<T>();
 }
 
 template<typename T>
-util::Optional<double> PrimitiveList<T>::average()
+util::Optional<double> PrimitiveList::average()
 {
-    return PrimitiveResults<T>(m_realm, *m_table).average();
+    return PrimitiveResults(m_realm, *m_table).average<T>();
 }
 
 // These definitions rely on that LinkViews are interned by core
-template<typename T>
-bool PrimitiveList<T>::operator==(PrimitiveList const& rgt) const noexcept
+bool PrimitiveList::operator==(PrimitiveList const& rgt) const noexcept
 {
     return m_table.get() == rgt.m_table.get();
 }
 
-namespace std {
-template<typename T>
-size_t hash<realm::PrimitiveList<T>>::operator()(realm::PrimitiveList<T> const& list) const
-{
-    return std::hash<void*>()(list.m_table.get());
-}
-}
+// namespace std {
+// template<>
+// size_t hash<realm::PrimitiveList>::operator()(realm::PrimitiveList const& list) const
+// {
+//     return std::hash<void*>()(list.m_table.get());
+// }
+// }
 
-template<typename T>
-NotificationToken PrimitiveList<T>::add_notification_callback(CollectionChangeCallback cb) &
+NotificationToken PrimitiveList::add_notification_callback(CollectionChangeCallback cb) &
 {
     verify_attached();
     if (!m_notifier) {
@@ -302,15 +280,29 @@ NotificationToken PrimitiveList<T>::add_notification_callback(CollectionChangeCa
 }
 
 namespace realm {
-template class PrimitiveList<bool>;
-template class PrimitiveList<int64_t>;
-template class PrimitiveList<float>;
-template class PrimitiveList<double>;
-template class PrimitiveList<StringData>;
-template class PrimitiveList<BinaryData>;
-template class PrimitiveList<Timestamp>;
-template class PrimitiveList<util::Optional<bool>>;
-template class PrimitiveList<util::Optional<int64_t>>;
-template class PrimitiveList<util::Optional<float>>;
-template class PrimitiveList<util::Optional<double>>;
+#define REALM_PRIMITIVE_LIST_TYPE(T) \
+    template T PrimitiveList::get<T>(size_t) const; \
+    template T PrimitiveList::get_unchecked<T>(size_t) const noexcept; \
+    template size_t PrimitiveList::find<T>(T) const; \
+    template void PrimitiveList::add<T>(T); \
+    template void PrimitiveList::insert<T>(size_t, T); \
+    template void PrimitiveList::set<T>(size_t, T); \
+    template util::Optional<T> PrimitiveList::max<T>(); \
+    template util::Optional<T> PrimitiveList::min<T>(); \
+    template util::Optional<double> PrimitiveList::average<T>(); \
+    template util::Optional<T> PrimitiveList::sum<T>();
+
+REALM_PRIMITIVE_LIST_TYPE(bool)
+REALM_PRIMITIVE_LIST_TYPE(int64_t)
+REALM_PRIMITIVE_LIST_TYPE(float)
+REALM_PRIMITIVE_LIST_TYPE(double)
+REALM_PRIMITIVE_LIST_TYPE(StringData)
+REALM_PRIMITIVE_LIST_TYPE(BinaryData)
+REALM_PRIMITIVE_LIST_TYPE(Timestamp)
+REALM_PRIMITIVE_LIST_TYPE(util::Optional<bool>)
+REALM_PRIMITIVE_LIST_TYPE(util::Optional<int64_t>)
+REALM_PRIMITIVE_LIST_TYPE(util::Optional<float>)
+REALM_PRIMITIVE_LIST_TYPE(util::Optional<double>)
+
+#undef REALM_PRIMITIVE_LIST_TYPE
 }

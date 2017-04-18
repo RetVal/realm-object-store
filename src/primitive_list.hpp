@@ -21,25 +21,27 @@
 
 #include "collection_notifications.hpp"
 #include "impl/collection_notifier.hpp"
+#include "util/compiler.hpp"
 
 #include <realm/table_ref.hpp>
+#include <realm/data_type.hpp>
 
 #include <functional>
 #include <memory>
 
 namespace realm {
 class ObjectSchema;
+class PrimitiveResults;
 class Query;
 class Realm;
 class SortDescriptor;
-template<typename> class PrimitiveResults;
+class Timestamp;
 template<typename> class ThreadSafeReference;
 
 namespace _impl {
 class PrimitiveListNotifier;
 }
 
-template<typename T>
 class PrimitiveList {
 public:
     PrimitiveList() noexcept;
@@ -60,32 +62,67 @@ public:
     void verify_in_transaction() const;
 
     size_t size() const;
-    T get(size_t row_ndx) const;
-    T get_unchecked(size_t row_ndx) const noexcept;
-    size_t find(T value) const;
 
-    void add(T value);
-    void insert(size_t list_ndx, T value);
     void move(size_t source_ndx, size_t dest_ndx);
     void remove(size_t list_ndx);
     void remove_all();
-    void set(size_t row_ndx, T value);
     void swap(size_t ndx1, size_t ndx2);
 
-    PrimitiveResults<T> sort(bool ascending);
-    PrimitiveResults<T> filter(Query q);
+    PrimitiveResults sort(bool ascending);
+    PrimitiveResults filter(Query q);
 
     // Return a PrimitiveResults<T> representing a snapshot of this PrimitiveList.
-    PrimitiveResults<T> snapshot() const;
+    PrimitiveResults snapshot() const;
+
+    template<typename T>
+    T get(size_t row_ndx) const;
+    template<typename T>
+    T get_unchecked(size_t row_ndx) const noexcept;
+    template<typename T>
+    size_t find(T value) const;
+
+    template<typename T>
+    void add(T value);
+    template<typename T>
+    void insert(size_t list_ndx, T value);
+    template<typename T>
+    void set(size_t row_ndx, T value);
 
     // Get the min/max/average/sum of the values in the list
     // All but sum() returns none when there are zero matching rows
     // sum() returns 0, except for when it returns none
     // Throws UnsupportedColumnTypeException for sum/average on timestamp or non-numeric column
-    util::Optional<T> max();
-    util::Optional<T> min();
-    util::Optional<double> average();
-    util::Optional<T> sum();
+    template<typename T> util::Optional<T> max();
+    template<typename T> util::Optional<T> min();
+    template<typename T> util::Optional<double> average();
+    template<typename T> util::Optional<T> sum();
+
+    template<typename Context>
+    auto get(Context&, size_t row_ndx) const;
+    template<typename Context>
+    auto get_unchecked(Context&, size_t row_ndx) const noexcept;
+    template<typename T, typename Context>
+    size_t find(Context&, T value) const;
+
+    template<typename T, typename Context>
+    void add(Context&, T value);
+    template<typename T, typename Context>
+    void insert(Context&, size_t list_ndx, T value);
+    template<typename T, typename Context>
+    void set(Context&, size_t row_ndx, T value);
+
+    // Get the min/max/average/sum of the values in the list
+    // All but sum() returns none when there are zero matching rows
+    // sum() returns 0, except for when it returns none
+    // Throws UnsupportedColumnTypeException for sum/average on timestamp or non-numeric column
+    template<typename Context>
+    auto max(Context&);
+    template<typename Context>
+    auto min(Context&);
+    template<typename Context>
+    auto average(Context&);
+    template<typename Context>
+    auto sum(Context&);
 
     bool operator==(PrimitiveList const& rgt) const noexcept;
 
@@ -100,14 +137,94 @@ private:
 
     void verify_valid_row(size_t row_ndx, bool insertion = false) const;
 
+    template<typename Fn>
+    auto dispatch(Fn&&) const noexcept;
+
+    int get_type() const noexcept;
+    bool is_optional() const noexcept;
+
     friend struct std::hash<PrimitiveList>;
 };
+
+template<typename Fn>
+auto PrimitiveList::dispatch(Fn&& fn) const noexcept
+{
+    switch (get_type()) {
+        case type_Int:    return is_optional() ? fn((util::Optional<int64_t>*)0) : fn((int64_t*)0);
+        case type_Bool:   return is_optional() ? fn((util::Optional<bool>*)0)    : fn((bool*)0);
+        case type_Float:  return is_optional() ? fn((util::Optional<float>*)0)   : fn((float*)0);
+        case type_Double: return is_optional() ? fn((util::Optional<double>*)0)  : fn((double*)0);
+        case type_String: return fn((StringData*)0);
+        case type_Binary: return fn((BinaryData*)0);
+        case type_Timestamp: return fn((Timestamp*)0);
+        default: REALM_COMPILER_HINT_UNREACHABLE();
+    }
+}
+
+template<typename Context>
+auto PrimitiveList::get(Context& ctx, size_t row_ndx) const
+{
+    return dispatch([&](auto t) { return ctx.box(get<std::decay_t<decltype(*t)>>(row_ndx)); });
+}
+template<typename Context>
+auto PrimitiveList::get_unchecked(Context& ctx, size_t row_ndx) const noexcept
+{
+    return dispatch([&](auto t) { return ctx.box(get_unchecked<std::decay_t<decltype(*t)>>(row_ndx)); });
+}
+
+template<typename T, typename Context>
+size_t PrimitiveList::find(Context& ctx, T value) const
+{
+    return dispatch([&](auto t) { return find(ctx.template unbox<std::decay_t<decltype(*t)>>(value)); });
+}
+
+template<typename T, typename Context>
+void PrimitiveList::add(Context& ctx, T value)
+{
+    dispatch([&](auto t) { add(ctx.template unbox<std::decay_t<decltype(*t)>>(value)); });
+}
+
+template<typename T, typename Context>
+void PrimitiveList::insert(Context& ctx, size_t list_ndx, T value)
+{
+    dispatch([&](auto t) { insert(list_ndx, ctx.template unbox<std::decay_t<decltype(*t)>>(value)); });
+}
+
+template<typename T, typename Context>
+void PrimitiveList::set(Context& ctx, size_t row_ndx, T value)
+{
+    dispatch([&](auto t) { set(row_ndx, ctx.template unbox<std::decay_t<decltype(*t)>>(value)); });
+}
+
+template<typename Context>
+auto PrimitiveList::max(Context& ctx)
+{
+    return dispatch([&](auto t) { return ctx.box(max<std::decay_t<decltype(*t)>>()); });
+}
+
+template<typename Context>
+auto PrimitiveList::min(Context& ctx)
+{
+    return dispatch([&](auto t) { return ctx.box(min<std::decay_t<decltype(*t)>>()); });
+}
+
+template<typename Context>
+auto PrimitiveList::average(Context& ctx)
+{
+    return dispatch([&](auto t) { return ctx.box(average<std::decay_t<decltype(*t)>>()); });
+}
+
+template<typename Context>
+auto PrimitiveList::sum(Context& ctx)
+{
+    return dispatch([&](auto t) { return ctx.box(sum<std::decay_t<decltype(*t)>>()); });
+}
 } // namespace realm
 
 namespace std {
-template<typename T>
-struct hash<realm::PrimitiveList<T>> {
-    size_t operator()(realm::PrimitiveList<T> const&) const;
+template<>
+struct hash<realm::PrimitiveList> {
+    size_t operator()(realm::PrimitiveList const&) const;
 };
 }
 
