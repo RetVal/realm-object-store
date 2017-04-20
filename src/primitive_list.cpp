@@ -22,7 +22,7 @@
 #include "impl/realm_coordinator.hpp"
 #include "list.hpp"
 #include "object_store.hpp"
-#include "primitive_results.hpp"
+#include "results.hpp"
 #include "schema.hpp"
 #include "shared_realm.hpp"
 #include "util/format.hpp"
@@ -211,48 +211,50 @@ void PrimitiveList::swap(size_t ndx1, size_t ndx2)
     m_table->swap_rows(ndx1, ndx2);
 }
 
-PrimitiveResults PrimitiveList::sort(bool ascending)
+Results PrimitiveList::sort(bool ascending)
 {
     verify_attached();
-    return PrimitiveResults(m_realm, get_query(),
-                            ascending ? PrimitiveResults::Sort::Ascending
-                                      : PrimitiveResults::Sort::Descending);
+    return Results();
+    // FIXME
+//    return Results(m_realm, get_query(),
+//                            ascending ? Results::Sort::Ascending
+//                                      : Results::Sort::Descending);
 }
 
-PrimitiveResults PrimitiveList::filter(Query q)
+Results PrimitiveList::filter(Query q)
 {
     verify_attached();
-    return PrimitiveResults(m_realm, get_query().and_query(std::move(q)));
+    return Results(m_realm, get_query().and_query(std::move(q)));
 }
 
-PrimitiveResults PrimitiveList::snapshot() const
+Results PrimitiveList::snapshot() const
 {
     verify_attached();
-    return PrimitiveResults(m_realm, *m_table).snapshot();
+    return Results(m_realm, *m_table).snapshot();
 }
 
 template<typename T>
 util::Optional<T> PrimitiveList::max()
 {
-    return PrimitiveResults(m_realm, *m_table).max<T>();
+    return Results(m_realm, *m_table).max<T>(0);
 }
 
 template<typename T>
 util::Optional<T> PrimitiveList::min()
 {
-    return PrimitiveResults(m_realm, *m_table).min<T>();
+    return Results(m_realm, *m_table).min<T>(0);
 }
 
 template<typename T>
 util::Optional<T> PrimitiveList::sum()
 {
-    return PrimitiveResults(m_realm, *m_table).sum<T>();
+    return Results(m_realm, *m_table).sum<T>(0);
 }
 
 template<typename T>
 util::Optional<double> PrimitiveList::average()
 {
-    return PrimitiveResults(m_realm, *m_table).average<T>();
+    return Results(m_realm, *m_table).average<double>(0);
 }
 
 // These definitions rely on that LinkViews are interned by core

@@ -28,7 +28,6 @@
 #include "object_schema.hpp"
 #include "property.hpp"
 #include "results.hpp"
-#include "primitive_results.hpp"
 #include "schema.hpp"
 
 #include <realm/group_shared.hpp>
@@ -44,7 +43,6 @@
 using namespace realm;
 
 TEST_CASE("notifications: async delivery") {
-    PrimitiveResults<int64_t> asdf;
     _impl::RealmCoordinator::assert_no_open_realms();
 
     InMemoryTestFile config;

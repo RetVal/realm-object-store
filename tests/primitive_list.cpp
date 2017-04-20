@@ -68,7 +68,7 @@ TEST_CASE("primitive list") {
 
     SECTION("size()") {
         CHECK(list.size() == 0);
-        list.add(0);
+        list.add(0LL);
         CHECK(list.size() == 1);
     }
 

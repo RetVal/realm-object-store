@@ -31,9 +31,9 @@
 
 namespace realm {
 class ObjectSchema;
-class PrimitiveResults;
 class Query;
 class Realm;
+class Results;
 class SortDescriptor;
 class Timestamp;
 template<typename> class ThreadSafeReference;
@@ -68,11 +68,11 @@ public:
     void remove_all();
     void swap(size_t ndx1, size_t ndx2);
 
-    PrimitiveResults sort(bool ascending);
-    PrimitiveResults filter(Query q);
+    Results sort(bool ascending);
+    Results filter(Query q);
 
-    // Return a PrimitiveResults<T> representing a snapshot of this PrimitiveList.
-    PrimitiveResults snapshot() const;
+    // Return a Results<T> representing a snapshot of this PrimitiveList.
+    Results snapshot() const;
 
     template<typename T>
     T get(size_t row_ndx) const;
@@ -140,8 +140,8 @@ private:
     template<typename Fn>
     auto dispatch(Fn&&) const noexcept;
 
-    int get_type() const noexcept;
-    bool is_optional() const noexcept;
+    int get_type() const noexcept { return 0; }
+    bool is_optional() const noexcept { return false; }
 
     friend struct std::hash<PrimitiveList>;
 };

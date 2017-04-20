@@ -7,7 +7,6 @@ set(SOURCES
     object_schema.cpp
     object_store.cpp
     primitive_list.cpp
-    primitive_results.cpp
     results.cpp
     schema.cpp
     shared_realm.cpp
@@ -19,7 +18,6 @@ set(SOURCES
     impl/object_notifier.cpp
     impl/primitive_list_notifier.cpp
     impl/realm_coordinator.cpp
-    impl/results_base.cpp
     impl/results_notifier.cpp
     impl/transact_log_handler.cpp
     impl/weak_realm_notifier.cpp
@@ -39,7 +37,6 @@ set(HEADERS
     object_schema.hpp
     object_store.hpp
     primitive_list.hpp
-    primitive_results.hpp
     property.hpp
     results.hpp
     schema.hpp
@@ -58,7 +55,6 @@ set(HEADERS
     impl/object_notifier.hpp
     impl/primitive_list_notifier.hpp
     impl/realm_coordinator.hpp
-    impl/results_base.hpp
     impl/results_notifier.hpp
     impl/transact_log_handler.hpp
     impl/weak_realm_notifier.hpp
