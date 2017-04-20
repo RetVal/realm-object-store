@@ -321,26 +321,6 @@ size_t Object::get_for_primary_key_impl(ContextType& ctx, Table const& table,
     return table.find_first_int(primary_prop.table_column, ctx.to_long(primary_value));
 }
 
-//
-// List implementation
-//
-template<typename ValueType, typename ContextType>
-void List::add(ContextType& ctx, ValueType value)
-{
-    add(ctx.to_object_index(m_realm, value, get_object_schema().name, false));
-}
-
-template<typename ValueType, typename ContextType>
-void List::insert(ContextType& ctx, ValueType value, size_t list_ndx)
-{
-    insert(list_ndx, ctx.to_object_index(m_realm, value, get_object_schema().name, false));
-}
-
-template<typename ValueType, typename ContextType>
-void List::set(ContextType& ctx, ValueType value, size_t list_ndx)
-{
-    set(list_ndx, ctx.to_object_index(m_realm, value, get_object_schema().name, false));
-}
 } // namespace realm
 
-#endif /* defined(REALM_OS_OBJECT_ACCESSOR_HPP) */
+#endif // REALM_OS_OBJECT_ACCESSOR_HPP

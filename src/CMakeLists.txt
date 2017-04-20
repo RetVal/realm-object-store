@@ -6,7 +6,6 @@ set(SOURCES
     object.cpp
     object_schema.cpp
     object_store.cpp
-    primitive_list.cpp
     results.cpp
     schema.cpp
     shared_realm.cpp
@@ -36,7 +35,6 @@ set(HEADERS
     object_accessor.hpp
     object_schema.hpp
     object_store.hpp
-    primitive_list.hpp
     property.hpp
     results.hpp
     schema.hpp
